@@ -149,7 +149,7 @@ def main():
     # If there is a PR already updating from the same version, push to it
     prs = search_base_prs(gh, PACKAGE, PRE_VERSION)
     base_pr = next(
-        (pr for pr in prs.items if pr.title.startswith("{PACKAGE}: {PRE_VERSION} -> ")),
+        (pr for pr in prs.items if pr.title.startswith(f"{PACKAGE}: {PRE_VERSION} -> ")),
         None,
     )
     if base_pr:
