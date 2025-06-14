@@ -8,7 +8,7 @@ import textwrap
 from pathlib import Path
 
 import semver
-from githubkit import GitHub, SearchIssuesGetResponse200
+from githubkit import GitHub
 
 # Note: for the time being all PRs target master, but this is configurable should the need arise to target eg staging.
 TARGET_BRANCH = "master"
@@ -52,9 +52,7 @@ def semver_is_upgrade(old, new):
     return semver.compare(new, old) == 1
 
 
-def search_existing_prs(
-    gh: GitHub, package: str, newversion: str
-) -> SearchIssuesGetResponse200:
+def search_existing_prs(gh: GitHub, package: str, newversion: str):
     resp = gh.rest.search.issues_and_pull_requests(
         q=f"{package} {newversion} org:NixOS repo:nixpkgs type:pr state:open in:title"
     )
