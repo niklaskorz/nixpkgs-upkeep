@@ -34,7 +34,7 @@ def git_diff_index_clean() -> bool:
 
 def nix_instantiate_eval(expr: str):
     out = subprocess.check_output(
-        "nix-instantiate", "--eval", "-E", "with import ./. {}; " + expr, "--json"
+        ["nix-instantiate", "--eval", "-E", "with import ./. {}; " + expr, "--json"]
     )
     return json.loads(out)
 
