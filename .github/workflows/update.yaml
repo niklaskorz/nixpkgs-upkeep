@@ -7,7 +7,13 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  zed-editor:
+  update-package:
+    strategy:
+      matrix:
+        package:
+          - zed-editor
+          - shader-slang
+    name: ${{ matrix.package }}
     runs-on: ubuntu-latest
     steps:
       - name: Maximize disk space
@@ -35,10 +41,10 @@ jobs:
           token: "${{ secrets.GH_TOKEN }}"
       - name: Check current package version and run update script
         run: |
-          PRE_VERSION="$(nix eval --raw --file . zed-editor.version)"
+          PRE_VERSION="$(nix eval --raw --file . ${{ matrix.package }}.version)"
           echo "Current version: $PRE_VERSION"
           echo "PRE_VERSION=$PRE_VERSION" >> $GITHUB_ENV
-          nix-shell maintainers/scripts/update.nix --argstr package "zed-editor" --argstr skip-prompt true
+          nix-shell maintainers/scripts/update.nix --argstr package "${{ matrix.package }}" --argstr skip-prompt true
         working-directory: "./nixpkgs"
       - run: git diff
         working-directory: "./nixpkgs"
@@ -47,7 +53,7 @@ jobs:
         name: Create PR
         run: |
           GH_TOKEN="$GH_TOKEN" \
-            PACKAGE="zed-editor" \
+            PACKAGE="${{ matrix.package }}" \
             PRE_VERSION="$PRE_VERSION" \
             GITHUB_WORKFLOW_URL="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             ./../nixpkgs-upkeep/create-pr.py
