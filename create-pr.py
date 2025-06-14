@@ -23,7 +23,7 @@ GITHUB_WORKFLOW_URL = os.environ.get("GITHUB_WORKFLOW_URL", "")
 
 
 def git(*args, **kwargs):
-    ret = subprocess.call(["git"] + args, **kwargs)
+    ret = subprocess.call(["git", *args], **kwargs)
     if ret != 0:
         sys.exit(ret)
 
