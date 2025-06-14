@@ -50,5 +50,5 @@ jobs:
             PACKAGE="zed-editor" \
             PRE_VERSION="$PRE_VERSION" \
             GITHUB_WORKFLOW_URL="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
-            ./../nixpkgs-upkeep/create-pr.sh
+            ./../nixpkgs-upkeep/create-pr.py
         working-directory: "./nixpkgs"
