@@ -5,6 +5,7 @@ import subprocess
 import json
 import sys
 import textwrap
+import builtins
 from pathlib import Path
 
 import semver
@@ -20,6 +21,10 @@ PACKAGE = os.environ["PACKAGE"]
 PRE_VERSION = os.environ["PRE_VERSION"]
 GH_TOKEN = os.environ["GH_TOKEN"]
 GITHUB_WORKFLOW_URL = os.environ.get("GITHUB_WORKFLOW_URL", "")
+
+
+def print(*args, **kwargs):
+    builtins.print(*args, flush=True, **kwargs)
 
 
 def git(*args, **kwargs):
@@ -71,13 +76,8 @@ def extract_template(body: str) -> str | None:
 
 
 def nix_build(package):
-    try:
-        output = subprocess.check_output(
-            ["nix-build", "-A", package], stderr=subprocess.STDOUT
-        ).decode()
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output.decode()
+    ret = subprocess.call(["nix-build", "-A", package])
+    return ret == 0
 
 
 def main():
@@ -149,7 +149,11 @@ def main():
     # If there is a PR already updating from the same version, push to it
     prs = search_base_prs(gh, PACKAGE, PRE_VERSION)
     base_pr = next(
-        (pr for pr in prs.items if pr.title.startswith(f"{PACKAGE}: {PRE_VERSION} -> ")),
+        (
+            pr
+            for pr in prs.items
+            if pr.title.startswith(f"{PACKAGE}: {PRE_VERSION} -> ")
+        ),
         None,
     )
     if base_pr:
@@ -203,17 +207,14 @@ def main():
         print(f"Created PR: {pr_url}")
 
     print("Running nix-build...")
-    build_succeeded, build_log = nix_build(PACKAGE)
+    build_succeeded = nix_build(PACKAGE)
 
     if build_succeeded:
-        body = (
-            "nix-build was successful! Marking this PR as ready for review.\n\n"
-            "<details>\n<summary>Complete build log</summary>\n\n"
-            "```\n"
-            f"> nix-build -A {PACKAGE}\n{build_log}\n"
-            "```\n"
-            "</details>\n"
-        )
+        body = textwrap.dedent(f"""
+            nix-build was successful! Marking this PR as ready for review.
+
+            [Complete build log]({GITHUB_WORKFLOW_URL})
+        """)
         resp = gh.rest.issues.create_comment(
             owner="NixOS",
             repo="nixpkgs",
@@ -234,20 +235,12 @@ def main():
 
         # TODO: run nixpkgs-review as well if nix-build succeeds
     else:
-        abbreviated = "\n".join(build_log.splitlines()[-15:])
-        body = (
-            "nix-build failed. Leaving this PR as a draft for now. Push commits "
-            'to this branch and mark as "ready for review" once the build issues have been resolved.\n\n'
-            "Abbreviated log:\n"
-            "```\n"
-            f"> nix-build -A {PACKAGE}\n...\n{abbreviated}\n"
-            "```\n\n"
-            "<details>\n<summary>Complete build log</summary>\n\n"
-            "```\n"
-            f"> nix-build -A {PACKAGE}\n{build_log}\n"
-            "```\n"
-            "</details>\n"
-        )
+        body = textwrap.dedent(f"""
+            nix-build failed. Push commits to this branch and mark as "ready for review"
+            once the build issues have been resolved.
+
+            [Complete build log]({GITHUB_WORKFLOW_URL})
+        """)
         resp = gh.rest.issues.create_comment(
             owner="NixOS",
             repo="nixpkgs",
