@@ -45,7 +45,9 @@ def nix_instantiate_eval(expr: str):
 
 
 def semver_is_upgrade(old, new):
-    return semver.compare(new, old) == 1
+    new_ver = semver.Version.parse(new, optional_minor_and_patch=True)
+    old_ver = semver.Version.parse(old, optional_minor_and_patch=True)
+    return new_ver.compare(old_ver) == 1
 
 
 def search_existing_prs(gh: GitHub, package: str, new_version: str):

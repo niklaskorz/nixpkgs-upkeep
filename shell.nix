@@ -7,6 +7,7 @@ pkgs.mkShell {
       ps: with ps; [
         semver
         githubkit
+        ruff
       ]
     ))
   ];
