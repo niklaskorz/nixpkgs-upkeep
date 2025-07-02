@@ -17,7 +17,13 @@ jobs:
     name: ${{ matrix.package }}
     runs-on: ubuntu-latest
     steps:
-      - uses: wimpysworld/nothing-but-nix@main
+      - name: Maximize disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
       - run: lscpu
       - uses: "cachix/install-nix-action@v31"
         with:
