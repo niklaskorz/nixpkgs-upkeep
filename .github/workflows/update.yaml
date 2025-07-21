@@ -42,7 +42,7 @@ jobs:
       - name: Check current package version and run update script
         working-directory: "./nixpkgs"
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.GH_TOKEN }}"
         run: |
           PRE_VERSION="$(nix eval --raw --file . ${{ matrix.package }}.version)"
           echo "Current version: $PRE_VERSION"
