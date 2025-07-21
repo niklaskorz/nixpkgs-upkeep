@@ -40,17 +40,20 @@ jobs:
           repository: NixOS/nixpkgs
           token: "${{ secrets.GH_TOKEN }}"
       - name: Check current package version and run update script
+        working-directory: "./nixpkgs"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: |
           PRE_VERSION="$(nix eval --raw --file . ${{ matrix.package }}.version)"
           echo "Current version: $PRE_VERSION"
           echo "PRE_VERSION=$PRE_VERSION" >> $GITHUB_ENV
           nix-shell maintainers/scripts/update.nix --argstr package "${{ matrix.package }}" --argstr skip-prompt true
-        working-directory: "./nixpkgs"
       - run: git diff
         working-directory: "./nixpkgs"
-      - env:
+      - name: Create PR
+        working-directory: "./nixpkgs"
+        env:
           GH_TOKEN: "${{ secrets.GH_TOKEN }}"
-        name: Create PR
         run: |
           GH_TOKEN="$GH_TOKEN" \
             PACKAGE="${{ matrix.package }}" \
@@ -58,7 +61,6 @@ jobs:
             GITHUB_WORKFLOW_URL="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             GITHUB_ENV="$GITHUB_ENV" \
             ./../nixpkgs-upkeep/create-pr.py
-        working-directory: "./nixpkgs"
       - name: nixpkgs-review
         working-directory: "./nixpkgs"
         env:
