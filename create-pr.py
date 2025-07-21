@@ -21,6 +21,7 @@ PACKAGE = os.environ["PACKAGE"]
 PRE_VERSION = os.environ["PRE_VERSION"]
 GH_TOKEN = os.environ["GH_TOKEN"]
 GITHUB_WORKFLOW_URL = os.environ.get("GITHUB_WORKFLOW_URL", "")
+GH_ENV = os.environ["GITHUB_ENV"]
 
 
 def print(*args, **kwargs):
@@ -250,6 +251,9 @@ def main():
             body=body,
         )
         resp.raise_for_status()
+
+    with open(GH_ENV, "a") as env_file:
+        env_file.write(f"NIXPKGS_PR_ID={pr.number}\n")
 
 
 if __name__ == "__main__":

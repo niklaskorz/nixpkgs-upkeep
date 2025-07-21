@@ -14,6 +14,7 @@ jobs:
         package:
           - zed-editor
           - shader-slang
+          - ente-auth
     name: ${{ matrix.package }}
     runs-on: ubuntu-latest
     steps:
@@ -55,5 +56,14 @@ jobs:
             PACKAGE="${{ matrix.package }}" \
             PRE_VERSION="$PRE_VERSION" \
             GITHUB_WORKFLOW_URL="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            GITHUB_ENV="$GITHUB_ENV" \
             ./../nixpkgs-upkeep/create-pr.py
         working-directory: "./nixpkgs"
+      - name: nixpkgs-review
+        working-directory: "./nixpkgs"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GH_TOKEN }}"
+        run: |
+          if [ "$NIXPKGS_PR_ID" ]; then
+            nix-shell -p nixpkgs-review --run "nixpkgs-review pr --no-shell --checkout commit --post-result $NIXPKGS_PR_ID"
+          fi
