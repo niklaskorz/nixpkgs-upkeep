@@ -235,8 +235,6 @@ def main():
             """,
             {"pr": pr.node_id},
         )
-
-        # TODO: run nixpkgs-review as well if nix-build succeeds
     else:
         body = textwrap.dedent(f"""
             nix-build failed. Push commits to this branch and mark as "ready for review"
@@ -251,6 +249,8 @@ def main():
             body=body,
         )
         resp.raise_for_status()
+
+        sys.exit(1)
 
     with open(GH_ENV, "a") as env_file:
         env_file.write(f"NIXPKGS_PR_ID={pr.number}\n")
