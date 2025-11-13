@@ -60,6 +60,10 @@ jobs:
             PRE_VERSION="$PRE_VERSION" \
             GITHUB_WORKFLOW_URL="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             GITHUB_ENV="$GITHUB_ENV" \
+            OWNER="$GITHUB_REPOSITORY_OWNER" \
+            THIS_REPO="$GITHUB_REPOSITORY" \
+            BOT_USER="${{ vars.BOT_USER }}" \
+            BOT_EMAIL="${{ vars.BOT_EMAIL }}" \
             ./../nixpkgs-upkeep/create-pr.py
       - name: nixpkgs-review
         working-directory: "./nixpkgs"
