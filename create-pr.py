@@ -260,7 +260,7 @@ def main():
 
     tests = nix_instantiate_eval("builtins.attrNames " + PACKAGE + ".tests or {}")
     review_args = shlex.join(
-        [x for pair in [("-a", attr) for attr in tests] for x in pair]
+        [x for pair in [("-a", f"{PACKAGE}.tests.{attr}") for attr in tests] for x in pair]
     )
     with open(GH_ENV, "a") as env_file:
         env_file.write(f"NIXPKGS_PR_ID={pr.number}\n")
