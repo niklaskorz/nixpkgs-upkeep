@@ -6,6 +6,7 @@ import json
 import sys
 import textwrap
 import builtins
+import shlex
 from pathlib import Path
 
 import semver
@@ -257,8 +258,13 @@ def main():
 
         sys.exit(1)
 
+    tests = nix_instantiate_eval("builtins.attrNames " + PACKAGE + ".tests or {}")
+    review_args = shlex.join(
+        [x for pair in [("-a", attr) for attr in tests] for x in pair]
+    )
     with open(GH_ENV, "a") as env_file:
         env_file.write(f"NIXPKGS_PR_ID={pr.number}\n")
+        env_file.write(f"NIXPKGS_REVIEW_ARGS={review_args}\n")
 
 
 if __name__ == "__main__":

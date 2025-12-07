@@ -71,5 +71,5 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GH_TOKEN }}"
         run: |
           if [ "$NIXPKGS_PR_ID" ]; then
-            nix-shell -p nixpkgs-review --run "nixpkgs-review pr --no-shell --post-result $NIXPKGS_PR_ID"
+            nix-shell -p nixpkgs-review --run "nixpkgs-review pr --no-shell --post-result $NIXPKGS_REVIEW_ARGS $NIXPKGS_PR_ID"
           fi
